@@ -2,7 +2,7 @@ import React, {useState} from 'react'
 import OpenAI from "openai"
 
 export default function Main() {
-    let languages = ["French 🍷", "Spanish 🐂", "Japanese 🍣"]
+    const languages = ["French 🍷", "Spanish 🐂", "Japanese 🍣"]
 
     // Managing language choice
     const [selectedOption, setSelectedOption] = useState('french');
@@ -10,41 +10,42 @@ export default function Main() {
 
     // Managing "Translate" button
     const [clickedTranslate, setClickedTranslate] = useState(false)
-
-    const contentInput = document.getElementById("contentInput")
-    const contentOutput = document.getElementById("contentOutput")
-
-    // Adding AI functionality
-    // const openai = new OpenAI({
-    //     dangerouslyAllowBrowser: true
-    // })
-    // const input = [
-    //     {
-    //         role: "system",
-    //         content: "You are a professional translator."
-    //     },
-    //     {
-    //         role: "user",
-    //         content: ""
-    //     }
-    // ]
-    // const response = openai.chat.completions.create({
-    //     model: "gpt-4",
-    //     messages: input,
-    //     temperature: 1.1
-    // })
+    const [inputText, setInputText] = useState("")
+    const [outputText, setOutputText] = useState("")
 
     // Translation button functionality
-    function translate() {
+    async function translate() {
+        // Switching fields labels and capturing current input as output
+        setClickedTranslate(prev => !prev)
         
-        // Switching fields labels
-        setClickedTranslate(!clickedTranslate)
-
-        contentOutput.value = contentInput.value
-
+        // Initialize OpenAI client
+        const openai = new OpenAI({
+            dangerouslyAllowBrowser: true
+        })
+        
+        const input = [
+            {
+                role: "system",
+                content: "You are a professional translator."
+            },
+            {
+                role: "user",
+                content: `Translate the following text to ${selectedOption}: ${inputText}`
+            }
+        ]
+        
+        try {
+            const response = await openai.chat.completions.create({
+                model: "gpt-4",
+                messages: input,
+                temperature: 1.1
+            })
+            setOutputText(response.choices[0].message.content)
+        } catch (error) {
+            console.error("Translation error:", error)
+            setOutputText("Error translating text")
+        }
     }
-
-    let textOutput = ""
 
     console.log("TESTING CONSOLE")
 
@@ -58,6 +59,8 @@ export default function Main() {
                 className="content-display"
                 id="contentInput" 
                 placeholder="Hello! How are you?"
+                value={inputText}
+                onChange={(event) => setInputText(event.target.value)}
             ></textarea>
 
             {/* Output - Begin */}
@@ -104,10 +107,12 @@ export default function Main() {
             <textarea 
                 name="contentOutput"
                 className="content-display"
+                style={clickedTranslate ? {display: 'none'} : {display: 'block'}}
                 id="contentOutput"
-            >
-                {textOutput}
-            </textarea>
+                disabled
+                value={outputText}
+                readOnly
+            />
 
             <button 
                 className="btn-main" 

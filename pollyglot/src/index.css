@@ -73,6 +73,10 @@ button:focus-visible {
 
 /* PERSONALIZED CLASSES */
 
+button {
+  margin: 20px 0px;
+}
+
 /* Header */
 
 .header-wrapper {
