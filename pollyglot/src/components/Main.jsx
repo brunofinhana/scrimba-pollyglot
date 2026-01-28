@@ -15,35 +15,39 @@ export default function Main() {
 
     // Translation button functionality
     async function translate() {
-        // Switching fields labels and capturing current input as output
-        setClickedTranslate(prev => !prev)
+        if(inputText === !"") {
+            // Switching fields labesl and capturing current input as output
+            setClickedTranslate(prev => !prev)
         
-        // Initialize OpenAI client
-        const openai = new OpenAI({
-            dangerouslyAllowBrowser: true
-        })
-        
-        const input = [
-            {
-                role: "system",
-                content: "You are a professional translator."
-            },
-            {
-                role: "user",
-                content: `Translate the following text to ${selectedOption}: ${inputText}`
-            }
-        ]
-        
-        try {
-            const response = await openai.chat.completions.create({
-                model: "gpt-4",
-                messages: input,
-                temperature: 1.1
+            // Initialize OpenAI client
+            const openai = new OpenAI({
+                dangerouslyAllowBrowser: true
             })
-            setOutputText(response.choices[0].message.content)
-        } catch (error) {
-            console.error("Translation error:", error)
-            setOutputText("Error translating text")
+        
+            const input = [
+                {
+                    role: "system",
+                    content: "You are a professional translator."
+                },
+                {
+                    role: "user",
+                    content: `Translate the following text to ${selectedOption}: ${inputText}`
+                }
+            ]
+        
+            try {
+                const response = openai.chat.completions.create({
+                    model: "gpt-4",
+                    messages: input,
+                    temperature: 1.1
+                })
+                setOutputText(response.choices[0].messages.content)
+            } catch (error) {
+                console.error("Translate error: ", error)
+                setOutputText("Error translating text")
+            }
+        } else {
+            alert("Please, fill the field :)")
         }
     }
 
